@@ -60,10 +60,7 @@ class Game:
                     send("found word")
                 send(USERNAME)
                 self.share()
-                print("Waiting for others to finish the wordle.")
                 self.print_leaderboard()
-                print(f"The word was {self.solution_word}")
-                break
 
     def input_word(self):
         while True:
@@ -164,9 +161,10 @@ class Game:
                     print("\N{Black Large Square}", end="")
             print()
 
-    @staticmethod
-    def print_leaderboard():
+    def print_leaderboard(self):
+        print("Waiting for others to finish the wordle.")
         leaderboard = receive()
+        print(f"The word was {self.solution_word}")
         leaderboard = dict((sorted(leaderboard.items(), key=lambda item: item[1])))  # Sort the dict
 
         for place, username in enumerate(leaderboard):
@@ -198,11 +196,15 @@ def send(message):
 
 # Functions
 def main():
-    while True:
-        dimensions, solution_word = wait_for_gamestart()
+    try:
+        while True:
+            dimensions, solution_word = wait_for_gamestart()
 
-        g = Game(*dimensions, solution_word)
-        g.run_game()
+            g = Game(*dimensions, solution_word)
+            g.run_game()
+
+    except ConnectionResetError:
+        print("Connection to server closed.")
 
 
 if __name__ == "__main__":
