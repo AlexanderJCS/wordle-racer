@@ -61,6 +61,7 @@ class Game:
                 send(USERNAME)
                 self.share()
                 self.print_leaderboard()
+                break
 
     def input_word(self):
         while True:
