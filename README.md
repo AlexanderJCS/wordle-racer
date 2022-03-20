@@ -15,9 +15,10 @@ How to run the server:
 How to configure game settings (server side only)
 1. Open settings.json
 2. Change the board width or height. If the board width is 1, it will automatically choose a random letter of the alphabet as a word.
-3. If the width is not recognized as a key in solution_words.json, the server will crash.
+3. If the width is not recognized as a length in \server\words, the program provide an error.
 
 How to configure solution words (server side only):
-1. Add a key (if not already added) of the length of words you want to add
-2. Create a list of all the words of that length
-3. Add or remove words as you please
+1. Navigate to \server\words
+2. Create a .txt file (if not already created) named the length of words you want to add (e.g. 6.txt)
+3. Add words to the file (if it is a different length than the filename the wordle will be impossible)
+4. Configure the width of the board in \server\settings.json to the length of the words to use those words
