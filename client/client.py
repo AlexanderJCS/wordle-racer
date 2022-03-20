@@ -28,7 +28,7 @@ while True:
         print("Successfully connected. Waiting for round to end.")
         break
 
-    except IOError:
+    except (IOError, ValueError):
         print("Could not connect to server.")
 
 
@@ -88,30 +88,35 @@ class Game:
                 self.board[i] = list(user_word)
                 break
 
-    def print_board(self):
-        # Print the board
+    def print_board(self):  # Print the board
         print()
+
         for word in self.board:
-            for i, solution_letter in enumerate(self.solution_word):
-                letter = word[i]
+            solution_word_list = list(self.solution_word)
 
-                if solution_letter == letter:
-                    color_fore = Fore.GREEN
+            for i, letter in enumerate(word):
+                if letter in solution_word_list:
+                    if solution_word_list[i] == letter:
+                        self.correct_places.add(letter)
 
-                    self.correct_places.add(letter)
-                    if letter in self.incorrect_places:
-                        self.incorrect_places.remove(letter)
+                        if letter in self.incorrect_places:
+                            self.incorrect_places.remove(letter)
 
-                elif letter in self.solution_word:
-                    color_fore = Fore.YELLOW
+                        color_fore = Fore.GREEN
 
-                    if letter not in self.correct_places:
-                        self.incorrect_places.add(letter)
+                    else:
+                        if letter not in self.correct_places:
+                            self.incorrect_places.add(letter)
+
+                        color_fore = Fore.YELLOW
+
+                    for x in range(len(solution_word_list)):
+                        if solution_word_list[x] == letter:
+                            solution_word_list[x] = ""
 
                 else:
+                    self.wrong_letter.add(letter)
                     color_fore = ""
-                    if letter != EMPTY:
-                        self.wrong_letter.add(letter)
 
                 print(f'{color_fore}{word[i]}', end=" ")
             print()
