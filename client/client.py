@@ -113,6 +113,7 @@ class Game:
                     for x in range(len(solution_word_list)):
                         if solution_word_list[x] == letter:
                             solution_word_list[x] = ""
+                            break
 
                 else:
                     self.wrong_letter.add(letter)
@@ -150,18 +151,25 @@ class Game:
 
     def share(self):
         print("Shareable emojis:")
+
         for word in self.board:
             if word[0] == EMPTY:
                 break
 
-            for i, solution_letter in enumerate(self.solution_word):
-                letter = word[i]
+            solution_word_list = list(self.solution_word)
 
-                if solution_letter == letter:
-                    print("\N{Large Green Square}", end="")
+            for i, letter in enumerate(word):
+                if letter in solution_word_list:
+                    if solution_word_list[i] == letter:
+                        print("\N{Large Green Square}", end="")
 
-                elif letter in self.solution_word:
-                    print("\N{Large Yellow Square}", end="")
+                    else:
+                        print("\N{Large Yellow Square}", end="")
+
+                    for x in range(len(solution_word_list)):
+                        if solution_word_list[x] == letter:
+                            solution_word_list[x] = ""
+                            break
 
                 else:
                     print("\N{Black Large Square}", end="")
