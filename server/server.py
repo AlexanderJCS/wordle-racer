@@ -14,7 +14,7 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-IP = "127.0.0.1"
+IP = "192.168.1.12"
 PORT = 1234
 
 SOLUTION_FILE = "solution_words.json"
@@ -51,9 +51,16 @@ class PreGame:
 
     def get_word(self):
         if self.width > 1:
-            # Read the solution words file
-            solution_words = read_file("solution_words.json")
-            self.word = random.choice(solution_words[str(self.width)])
+            try:
+                # Read the solution words file
+                with open(f"words/{self.width}.txt") as f:
+                    words = f.read().splitlines()
+
+                self.word = random.choice(words)
+
+            except FileNotFoundError:
+                logging.critical(f"File words/{self.width}.txt not found.")
+                exit()
 
         else:
             self.word = random.choice(ascii_lowercase)
@@ -120,16 +127,21 @@ def send(client_socket, message):
 def receive(client_socket):
     logging.debug("Receiving message")
     message_header = b""
-    while len(message_header) < HEADERSIZE:
-        read = client_socket.recv(HEADERSIZE - len(message_header))
-        if not read:
-            clients.remove(client_socket)
-            logging.info("Client disconnected.")
-            return
-        message_header += read
 
-    message_length = int(message_header.decode('utf-8').strip())
-    return pickle.loads(client_socket.recv(message_length))
+    try:
+        while len(message_header) < HEADERSIZE:
+            read = client_socket.recv(HEADERSIZE - len(message_header))
+            if not read:
+                clients.remove(client_socket)
+                logging.info("Client disconnected when attempting to receive data.")
+                return
+            message_header += read
+
+        message_length = int(message_header.decode('utf-8').strip())
+        return pickle.loads(client_socket.recv(message_length))
+
+    except ConnectionResetError:
+        logging.info("ConnectionResetError: Client disconnected when attempting to receive data.")
 
 
 def read_file(filename):
@@ -151,6 +163,8 @@ def main():
             # Run game
             g = Game()
             g.run_game()
+
+            time.sleep(3)  # Wait 3 seconds inbetween games
 
 
 if __name__ == "__main__":
