@@ -96,7 +96,7 @@ class Game:
 
             for i, letter in enumerate(word):
                 if letter in solution_word_list:
-                    if solution_word_list[i] == letter:
+                    if solution_word_list[i] == letter:  # If the letter is in the correct place
                         self.correct_places.add(letter)
 
                         if letter in self.incorrect_places:
@@ -104,18 +104,18 @@ class Game:
 
                         color_fore = Fore.GREEN
 
-                    else:
+                    else:  # If the letter is in an incorrect place but it is in the final word
                         if letter not in self.correct_places:
                             self.incorrect_places.add(letter)
 
                         color_fore = Fore.YELLOW
 
-                    for x in range(len(solution_word_list)):
+                    for x in range(len(solution_word_list)):  # Remove letter from the solution word list
                         if solution_word_list[x] == letter:
                             solution_word_list[x] = ""
                             break
 
-                else:
+                else:  # If the letter is not in the final word
                     self.wrong_letter.add(letter)
                     color_fore = ""
 
@@ -153,25 +153,22 @@ class Game:
         print("Shareable emojis:")
 
         for word in self.board:
-            if word[0] == EMPTY:
-                break
-
             solution_word_list = list(self.solution_word)
 
             for i, letter in enumerate(word):
                 if letter in solution_word_list:
-                    if solution_word_list[i] == letter:
+                    if solution_word_list[i] == letter:  # If the letter is in the correct place
                         print("\N{Large Green Square}", end="")
 
-                    else:
+                    else:  # If the letter is in an incorrect place but it is in the final word
                         print("\N{Large Yellow Square}", end="")
 
-                    for x in range(len(solution_word_list)):
+                    for x in range(len(solution_word_list)):  # Remove letter from the solution word list
                         if solution_word_list[x] == letter:
                             solution_word_list[x] = ""
                             break
 
-                else:
+                else:  # If the letter is not in the final word
                     print("\N{Black Large Square}", end="")
             print()
 
