@@ -1,4 +1,5 @@
 # Import packages
+import copy
 import pickle
 import socket
 from string import ascii_lowercase
@@ -43,8 +44,11 @@ class Game:
         self.incorrect_places = set()
         self.wrong_letter = set()
 
+        self.colored_board = []
+
     def run_game(self):  # Logic of the game
         while True:
+            self.color_board()
             self.print_board()
             self.print_letters()
             self.input_word()
@@ -52,12 +56,15 @@ class Game:
             # Check if won
             if won := self.win_check() is not None:
                 if not won:
-                    self.print_board()
                     send("incomplete")
                     print(f"{Fore.RED}You lose!\n"*3)
 
                 else:
                     send("found word")
+
+                self.color_board()
+                self.print_board()
+
                 send(USERNAME)
                 self.share()
                 self.print_leaderboard()
@@ -88,38 +95,44 @@ class Game:
                 self.board[i] = list(user_word)
                 break
 
-    def print_board(self):  # Print the board
-        print()
+    def color_board(self):
+        self.colored_board = copy.deepcopy(self.board)
 
-        for word in self.board:
+        for y, word in enumerate(self.colored_board):
             solution_word_list = list(self.solution_word)
 
-            for i, letter in enumerate(word):
+            # Check for letters in correct places
+            for x, letter in enumerate(word):
+                if solution_word_list[x] == letter:
+                    self.colored_board[y][x] = Fore.GREEN + word[x]
+                    solution_word_list[x] = ""
+
+                    self.correct_places.add(letter)
+
+                    if letter in self.incorrect_places:
+                        self.incorrect_places.remove(letter)
+
+            # Check for letters in incorrect places but still in the word
+            for x, letter in enumerate(word):
                 if letter in solution_word_list:
-                    if solution_word_list[i] == letter:  # If the letter is in the correct place
-                        self.correct_places.add(letter)
+                    self.colored_board[y][x] = Fore.YELLOW + word[x]
+                    solution_word_list[solution_word_list.index(letter)] = ""
 
-                        if letter in self.incorrect_places:
-                            self.incorrect_places.remove(letter)
+            # Check for letters in incorrect places and not in the word
+            for letter in word:
+                condition1 = letter not in self.correct_places
+                condition2 = letter not in self.incorrect_places
+                condition3 = letter not in solution_word_list
+                condition4 = letter != EMPTY
 
-                        color_fore = Fore.GREEN
-
-                    else:  # If the letter is in an incorrect place but it is in the final word
-                        if letter not in self.correct_places:
-                            self.incorrect_places.add(letter)
-
-                        color_fore = Fore.YELLOW
-
-                    for x in range(len(solution_word_list)):  # Remove letter from the solution word list
-                        if solution_word_list[x] == letter:
-                            solution_word_list[x] = ""
-                            break
-
-                else:  # If the letter is not in the final word
+                if condition1 and condition2 and condition3 and condition4:
                     self.wrong_letter.add(letter)
-                    color_fore = ""
 
-                print(f'{color_fore}{word[i]}', end=" ")
+    def print_board(self):  # Print the board
+        print()
+        for word in self.colored_board:
+            for letter in word:
+                print(letter, end=" ")
             print()
 
     def print_letters(self):
@@ -151,24 +164,18 @@ class Game:
 
     def share(self):
         print("Shareable emojis:")
+        for word in self.colored_board:
+            if word[0] == EMPTY:
+                break
 
-        for word in self.board:
-            solution_word_list = list(self.solution_word)
+            for letter in word:
+                if letter[:-1] == Fore.GREEN:
+                    print("\N{Large Green Square}", end="")
 
-            for i, letter in enumerate(word):
-                if letter in solution_word_list:
-                    if solution_word_list[i] == letter:  # If the letter is in the correct place
-                        print("\N{Large Green Square}", end="")
+                elif letter[:-1] == Fore.YELLOW:
+                    print("\N{Large Yellow Square}", end="")
 
-                    else:  # If the letter is in an incorrect place but it is in the final word
-                        print("\N{Large Yellow Square}", end="")
-
-                    for x in range(len(solution_word_list)):  # Remove letter from the solution word list
-                        if solution_word_list[x] == letter:
-                            solution_word_list[x] = ""
-                            break
-
-                else:  # If the letter is not in the final word
+                else:
                     print("\N{Black Large Square}", end="")
             print()
 
